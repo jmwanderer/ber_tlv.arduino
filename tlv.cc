@@ -154,6 +154,21 @@ void TLVS::printHex(const uint8_t* data, size_t length)
         printf("%02x ", data[i]);
 }
 
+void TLVS::printValue(const uint8_t* data, size_t length)
+{
+    if (data == NULL)
+        return;
+
+    for (int i = 0; i < length; i++) {
+        if (data[i] >= 32 && data[i] <= 126) {
+            printf("%c ", data[i]);
+        } else {
+            printf("\\x%02x ", data[i]);
+        }
+    }
+}
+
+
 void TLVS::printTLV(TLVNode* node, int indent)
 {
     for (int i = 0; i < indent; i++)
@@ -170,7 +185,7 @@ void TLVS::printTLV(TLVNode* node, int indent)
         for (int i = 0; i <= indent; i++)
             printf("    ");
  
-        printHex(node->getValue(), node->getValueLength());
+        printValue(node->getValue(), node->getValueLength());
         printf("\n");
     }
 
