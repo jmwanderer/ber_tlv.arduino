@@ -280,6 +280,92 @@ void test_seven()
     printf("\n");
 }
 
+uint8_t v1[] = { 0x1 };
+uint8_t v2[] = { 0x2 };
+uint8_t v3[] = { 0x3 };
+uint8_t v4[] = { 0x4 };
+
+void test_find()
+{
+    TLVS tlvs;
+    TLVNode *tlvNodeTop, *tlvNode;
+
+    // Find empty
+    tlvNode = tlvs.findTLV(0x80);
+    assert(tlvNode == NULL); 
+
+    // Find and find next
+    tlvNodeTop = tlvs.addTLV(0xBf01);
+
+    tlvNode = tlvs.addTLV(tlvNodeTop, 0x8A);
+    tlvs.addTLV(tlvNode, 0x8A, v2, sizeof(v2));
+    tlvNode = tlvs.addTLV(tlvNode, 0x8B);
+    tlvs.addTLV(tlvNode, 0x8B, v2, sizeof(v2));
+
+    tlvNode = tlvs.addTLV(tlvNodeTop, 0x8B);
+    tlvs.addTLV(tlvNode, 0x8A, v3, sizeof(v3));
+    tlvs.addTLV(tlvNode, 0x8B, v4, sizeof(v4));
+
+    tlvNode = tlvs.addTLV(tlvNode, 0x10);
+    tlvNode = tlvs.addTLV(tlvNode, 0x11);
+    tlvs.addTLV(tlvNode, 0x12);
+    tlvs.addTLV(tlvNode, 0x12);
+    tlvs.addTLV(0x12);
+
+    tlvNode = tlvs.findTLV(0x80);
+    assert(tlvNode == NULL); 
+
+    tlvNode = tlvs.findTLV(0x8A);
+    assert(tlvNode != NULL); 
+    assert(tlvNode->getTag() == 0x8A);
+    assert(tlvNode->getValue() == NULL);
+
+    tlvNode = tlvs.findNextTLV(tlvNode);
+    assert(tlvNode != NULL); 
+    assert(tlvNode->getTag() == 0x8A);
+    assert(tlvNode->getValue() != NULL);
+    assert(tlvNode->getValue()[0] == 2);
+
+    tlvNode = tlvs.findNextTLV(tlvNode);
+    assert(tlvNode != NULL); 
+    assert(tlvNode->getTag() == 0x8A);
+    assert(tlvNode->getValue() != NULL);
+    assert(tlvNode->getValue()[0] == 3);
+
+    tlvNode = tlvs.findNextTLV(tlvNode);
+    assert(tlvNode == NULL); 
+
+    tlvNode = tlvs.findTLV(0x8B);
+    assert(tlvNode != NULL); 
+    assert(tlvNode->getTag() == 0x8B);
+    assert(tlvNode->getValue() == NULL);
+
+    tlvNode = tlvs.findNextTLV(tlvNode);
+    assert(tlvNode != NULL); 
+    assert(tlvNode->getTag() == 0x8B);
+    assert(tlvNode->getValue() != NULL);
+    assert(tlvNode->getValue()[0] == 2);
+
+    tlvNode = tlvs.findNextTLV(tlvNode);
+    assert(tlvNode != NULL); 
+    assert(tlvNode->getTag() == 0x8B);
+    assert(tlvNode->getValue() == NULL);
+
+    tlvNode = tlvs.findNextTLV(tlvNode);
+    assert(tlvNode != NULL); 
+    assert(tlvNode->getTag() == 0x8B);
+    assert(tlvNode->getValue() != NULL);
+    assert(tlvNode->getValue()[0] == 4);
+
+    tlvNode = tlvs.findNextTLV(tlvNode);
+    assert(tlvNode == NULL); 
+
+    tlvNode = tlvs.findTLV(0x11);
+    assert(tlvNode != NULL); 
+    tlvNode = tlvs.findNextTLV(tlvNode);
+    assert(tlvNode == NULL); 
+}
+
 void test_decode_cases()
 {
     TLVS tlvs;
@@ -477,6 +563,9 @@ int main() {
     printf("Test 7\n");
     test_seven();
     printf("\n");
+
+    printf("Test find\n");
+    test_find();
 
     printf("Test Decode Cases\n");
     test_decode_cases();

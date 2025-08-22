@@ -145,6 +145,48 @@ TLVNode* TLVS::nextTLV(TLVNode* child)
     return dummy_node.nextChild(child);
 }
 
+TLVNode* TLVS::findTLV(uint16_t tag)
+{
+    return findTLVHelper(&dummy_node, tag);
+}
+
+TLVNode* TLVS::findNextTLV(TLVNode* node)
+{
+    if (node == NULL) {
+        return NULL;
+    }
+    return findTLVHelper(node, node->tag);
+}
+
+TLVNode* TLVS::findTLVHelper(TLVNode* node, uint16_t tag)
+{
+    while (node != NULL) {
+
+        // Move to next node
+        if (node->child != NULL) {
+            // Move to child
+            node = node->child;
+        } else if (node->next != NULL) {
+            // Check next sibling
+            node = node->next;
+        } else {
+            // Next sibling of a parent
+            do {
+                node = node->parent;
+            } while (node != NULL && node->next == NULL);
+            
+            if (node != NULL) {
+                node = node->next;
+            }
+        }
+        
+        if (node != NULL && node->getTag() == tag) {
+            return node;
+        }
+    }
+    return NULL;
+}
+
 void TLVS::printHex(const uint8_t* data, size_t length)
 {
     if (data == NULL)
@@ -512,6 +554,7 @@ void TLVNode::addChild(TLVNode* node)
 {
     if (child == NULL) {
         child = node;
+        node->parent = this;
         return;
     }
     TLVNode *last_child = child;

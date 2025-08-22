@@ -113,6 +113,8 @@ public:
     // Access TLVs
     TLVNode* firstTLV();
     TLVNode* nextTLV(TLVNode* tlvNode);
+    TLVNode* findTLV(uint16_t tag);
+    TLVNode* findNextTLV(TLVNode* node);
 
     // *********  Add new TLVs
 
@@ -161,6 +163,7 @@ public:
 
 private:
     void markError(int error);
+    TLVNode* findTLVHelper(TLVNode* node, uint16_t tag);
     
     TLVNode dummy_node;     // Child TLVs are the list of TLVs
     int error_value;        // Encode / decode error, if any.
