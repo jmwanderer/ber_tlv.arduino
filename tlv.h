@@ -141,7 +141,6 @@ public:
 
     // print a binary buffer as a hex string.
     static void printHex(const uint8_t *data, size_t length);
-    static void printASCII(const uint8_t *data, size_t length);
     static void printValue(const uint8_t *data, size_t length);
 
     // Print a TLV to stdout
