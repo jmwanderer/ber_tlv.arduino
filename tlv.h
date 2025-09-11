@@ -49,6 +49,7 @@ public:
     // Access child TLVs
     TLVNode* firstChild();
     TLVNode* nextChild(TLVNode* child);
+    TLVNode* findChild(uint16_t tag);
     
     // Utility functions to encode decode tags and length
     // Public to enable testing.
@@ -191,6 +192,7 @@ public:
     void seek(size_t count);
     bool getByte(uint8_t &value);
     bool putByte(uint8_t value);
+    bool putBytes(const uint8_t *values, uint8_t len);
     uint8_t *position();
 
     uint8_t *buffer;

@@ -547,6 +547,16 @@ TLVNode* TLVNode::nextChild(TLVNode* child)
     return child->next;
 }
 
+TLVNode* TLVNode::findChild(uint16_t tag)
+{
+    TLVNode* node;
+    for (node = firstChild(); node != NULL; node = nextChild(node)) {
+        if (node->tag == tag) {
+            return node;
+        }
+    }
+    return NULL;
+}
 
 //
 // Append a TLV to the end of the list
@@ -697,6 +707,16 @@ bool DataBuffer::putByte(uint8_t value)
         return true;
     }
     return false;
+}
+
+bool DataBuffer::putBytes(const uint8_t *values, uint8_t len)
+{
+    bool ok = true;
+    for (int i = 0; i < len; i++) {
+        bool result = putByte(values[i]);
+        ok = ok && result;
+    }
+    return ok;
 }
 
 // Return true if no more space to write or data to read.
