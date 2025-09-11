@@ -192,8 +192,13 @@ void TLVS::printHex(const uint8_t* data, size_t length)
     if (data == NULL)
         return;
 
-    for (int i = 0; i < length; i++)
-        printf("%02x ", data[i]);
+    for (int i = 0; i < length; i++) {
+        if (i != 0) {
+            printf(" ");
+        }
+        printf("%02x", data[i]);
+    }
+        
 }
 
 void TLVS::printValue(const uint8_t* data, size_t length)
@@ -201,12 +206,19 @@ void TLVS::printValue(const uint8_t* data, size_t length)
     if (data == NULL)
         return;
 
+    bool ascii = true;
     for (int i = 0; i < length; i++) {
-        if (data[i] >= 32 && data[i] <= 126) {
-            printf("%c ", data[i]);
-        } else {
-            printf("\\x%02x ", data[i]);
+        if (data[i] < 32 || data[i] > 126) {
+            ascii = false;
         }
+    }
+
+    if (ascii) {
+        for (int i = 0; i < length; i++) {
+            printf("%c ", data[i]);
+        }
+    } else {
+        printHex(data, length);
     }
 }
 
