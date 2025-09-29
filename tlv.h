@@ -223,6 +223,9 @@ public:
 
     // Write a byte into the buffer. Return false if out of space
     bool putByte(uint8_t value);
+
+    // Write multiple into the buffer. Return false if out of space
+    bool putBytes(const uint8_t *values, uint8_t len);
     
     // Return a pointer to the current write position
     uint8_t *position();

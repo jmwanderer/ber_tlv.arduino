@@ -754,4 +754,13 @@ bool WriteBuffer::putByte(uint8_t value)
     return false;
 }
 
+bool WriteBuffer::putBytes(const uint8_t *values, uint8_t len)
+{
+    bool ok = true;
+    for (int i = 0; i < len; i++) {
+        bool result = putByte(values[i]);
+        ok = ok && result;
+    }
+    return ok;
+}
 
