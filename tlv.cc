@@ -118,7 +118,7 @@ TLVNode* TLVS::addTLVCopy(TLVNode *parent, uint16_t tag, const uint8_t *value, u
 // Decode TLVs from the buffer
 void TLVS::decodeTLVs(uint8_t *buffer, size_t buffer_size)
 {
-    DataBuffer dataBuffer(buffer, buffer_size);
+    ReadBuffer dataBuffer(buffer, buffer_size);
     reset();
     dummy_node.decodeTLVNode(this, dataBuffer);
 }
@@ -127,7 +127,7 @@ void TLVS::decodeTLVs(uint8_t *buffer, size_t buffer_size)
 // Encode TLVs to the buffer
 size_t TLVS::encodeTLVs(uint8_t *buffer, size_t buffer_size)
 {
-    DataBuffer dataBuffer(buffer, buffer_size);
+    WriteBuffer dataBuffer(buffer, buffer_size);
     TLVNode *node = dummy_node.child;
     for (node = dummy_node.child; node != NULL; node = node->next) {
         node->encodeTLVNode(this, dataBuffer);
@@ -323,7 +323,7 @@ void TLVNode::freeContents()
 
 //
 // Static function to parse a TLV tag from the buffer.
-uint16_t TLVNode::parseTag(DataBuffer &buffer, int *error)
+uint16_t TLVNode::parseTag(ReadBuffer &buffer, int *error)
 {
     uint8_t byte =  0;
     uint16_t tag_value;
@@ -361,7 +361,7 @@ uint16_t TLVNode::parseTag(DataBuffer &buffer, int *error)
 
 //
 // Static function to encode a TLV tag to the buffer.
-int TLVNode::encodeTag(uint16_t tag, DataBuffer & buffer)
+int TLVNode::encodeTag(uint16_t tag, WriteBuffer & buffer)
 {
     int error = TLVS::ERROR_NONE;
 
@@ -384,7 +384,7 @@ int TLVNode::encodeTag(uint16_t tag, DataBuffer & buffer)
 
 //
 // Static function to parse a length fromthe buffer
-uint16_t TLVNode::parseLength(DataBuffer &buffer, int *error)
+uint16_t TLVNode::parseLength(ReadBuffer &buffer, int *error)
 {
     uint8_t byte;
     *error = TLVS::ERROR_NONE;
@@ -422,7 +422,7 @@ uint16_t TLVNode::parseLength(DataBuffer &buffer, int *error)
 
 //
 // Static function to encode a length to the buffer
-int TLVNode::encodeLength(uint32_t length, DataBuffer &buffer)
+int TLVNode::encodeLength(uint32_t length, WriteBuffer &buffer)
 {
     if (length <= 127) {
         buffer.putByte(length & 0xff);
@@ -443,7 +443,7 @@ int TLVNode::encodeLength(uint32_t length, DataBuffer &buffer)
 // Decode a child TLV
 // Instance may be the dummy node if the "child" is a top level TLV.
 //
-void TLVNode::decodeTLVNode(TLVS *tlvs, DataBuffer &buffer)
+void TLVNode::decodeTLVNode(TLVS *tlvs, ReadBuffer &buffer)
 {
     int error = TLVS::ERROR_NONE;
 
@@ -472,7 +472,7 @@ void TLVNode::decodeTLVNode(TLVS *tlvs, DataBuffer &buffer)
         TLVNode *node = tlvs->addTLV(this, tag, buffer.position(), len);
 
         if (Tag::tagConstructed(tag)) {
-            DataBuffer valueBuffer(buffer, len);
+            ReadBuffer valueBuffer(buffer, len);
             node->decodeTLVNode(tlvs, valueBuffer);
         }
         buffer.seek(len);
@@ -480,7 +480,7 @@ void TLVNode::decodeTLVNode(TLVS *tlvs, DataBuffer &buffer)
 }
 
 
-void TLVNode::encodeTLVNode(TLVS *tlvs, DataBuffer &buffer) {
+void TLVNode::encodeTLVNode(TLVS *tlvs, WriteBuffer &buffer) {
     // Cases:
     // - has children: encode tag and length,  encode children
     // - has value: encode tag and length, write value
@@ -651,93 +651,6 @@ uint16_t Tag::numLengthBytes(uint16_t length)
     return 1;
 }
 
-
-//
-// DataBuffer: utility for reading / writing data from a buffer
-//
-
-DataBuffer::DataBuffer()
-{
-    this->buffer = NULL;
-    this->buffer_size = 0;
-    this->pos = 0;
-}
-
-
-DataBuffer::DataBuffer(uint8_t *buffer, uint16_t size)
-{
-    this->buffer = buffer;
-    this->buffer_size = size;
-    this->pos = 0;
-}
-
-// Point to a portion of an existing buffer.
-// Used to decode nexted TLVs.
-DataBuffer::DataBuffer(DataBuffer dataBuffer, uint16_t size)
-{
-    this->buffer = dataBuffer.buffer;
-    this->pos = dataBuffer.pos;
-    this->buffer_size = dataBuffer.pos + size;
-    if (this->buffer_size > dataBuffer.buffer_size)
-        this->buffer_size = dataBuffer.buffer_size;
-}
-
-
-// Return current read or write position.
-uint8_t * DataBuffer::position()
-{
-    return buffer + pos;
-}
-
-// Change read / write position in buffer.
-void DataBuffer::seek(size_t count)
-{
-    pos += count;
-    if (pos < 0) {
-        pos = 0;
-    } else if (pos > buffer_size) {
-        pos = buffer_size;
-    }
-}
-
-// Fetch a byte from the buffer.
-// Return false if no more bytes to read
-bool DataBuffer::getByte(uint8_t &value)
-{
-    if (pos < buffer_size) {
-        value = buffer[pos++];
-        return true;
-    }
-    return false;
-}
-
-// Write a byte to the buffe.r
-// Return false if out of space.
-bool DataBuffer::putByte(uint8_t value)
-{
-    if (pos < buffer_size) {
-        buffer[pos++] = value;
-        return true;
-    }
-    return false;
-}
-
-bool DataBuffer::putBytes(const uint8_t *values, uint8_t len)
-{
-    bool ok = true;
-    for (int i = 0; i < len; i++) {
-        bool result = putByte(values[i]);
-        ok = ok && result;
-    }
-    return ok;
-}
-
-// Return true if no more space to write or data to read.
-bool DataBuffer::atEnd()
-{
-    return (pos >= buffer_size);
-}
-
 //
 // ReadBuffer: utility for safely reading data from a buffer
 //
@@ -769,7 +682,7 @@ ReadBuffer::ReadBuffer(ReadBuffer buffer, uint16_t size)
 }
 
 
-// Return current read or write position.
+// Return current read position.
 const uint8_t * ReadBuffer::position()
 {
     return buffer + pos;
@@ -805,7 +718,7 @@ bool ReadBuffer::atEnd()
 
 
 //
-// WriteBuffer: utility for writing data to a buffer
+// WriteBuffer: utility for safely writing data to a buffer
 //
 
 WriteBuffer::WriteBuffer()
@@ -824,7 +737,7 @@ WriteBuffer::WriteBuffer(uint8_t *buffer, uint16_t size)
 }
 
 
-// Return current read or write position.
+// Return current write position.
 uint8_t * WriteBuffer::position()
 {
     return buffer + pos;

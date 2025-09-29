@@ -14,34 +14,36 @@ void test_databuffer()
 {
     uint8_t buf[255];
     int count;
-    DataBuffer buffer(buf, sizeof(buf));
+    ReadBuffer readBuf(buf, sizeof(buf));
+    WriteBuffer writeBuf(buf, sizeof(buf));
 
-    assert(!buffer.atEnd());
-    buffer.seek(sizeof(buf));
-    assert(buffer.atEnd());
+    assert(!readBuf.atEnd());
+    readBuf.seek(sizeof(buf));
+    assert(readBuf.atEnd());
 
-    buffer.pos = 0;
-    buffer.putByte(0x1f);
-    buffer.pos = 0;
+    writeBuf.pos = 0;
+    writeBuf.putByte(0x1f);
+
 
     uint8_t byte;
-    buffer.getByte(byte);
+    readBuf.pos = 0;
+    readBuf.getByte(byte);
     assert(byte== 0x1f);
 
     for (count = 0; count < 1024; count++) {
-        buffer.putByte(0xee);
+        writeBuf.putByte(0xee);
     }
-    assert(buffer.pos == sizeof(buf));
+    assert(writeBuf.pos == sizeof(buf));
 
-    buffer.pos = 0;
+    writeBuf.pos = 0;
     for (count = 0; count < sizeof(buf); count++) {
-        buffer.putByte(count);
+        writeBuf.putByte(count);
     }
-    buffer.pos = 0;
+    readBuf.pos = 0;
     for (count = 0; count < 220; count++) {
-        buffer.getByte(byte);
+        readBuf.getByte(byte);
     }
-    DataBuffer sub_buffer(buffer, 20);
+    ReadBuffer sub_buffer(readBuf, 20);
     sub_buffer.getByte(byte);
     assert(byte == 220);
     for (count = 0; count < 19; count++) {
@@ -62,45 +64,47 @@ void test_tags()
     assert(!Tag::tagConstructed(0x84));
 
     uint8_t buf[127];
-    DataBuffer buffer(buf, sizeof(buf));
+    WriteBuffer writeBuf(buf, sizeof(buf));
+    ReadBuffer readBuf(buf, sizeof(buf));
+
     uint16_t tag = 0x5f2d;
-    error = TLVNode::encodeTag(tag, buffer);
+    error = TLVNode::encodeTag(tag, writeBuf);
     assert(!error);
-    assert(buffer.pos == 2);
+    assert(writeBuf.pos == 2);
     assert(Tag::numTagBytes(tag) == 2);
-    buffer.pos = 0;
-    assert(TLVNode::parseTag(buffer, &error) == tag);
+    readBuf.pos = 0;
+    assert(TLVNode::parseTag(readBuf, &error) == tag);
     assert(error == 0);
 
     tag = 0x6f;
-    buffer.pos = 0;
-    error = TLVNode::encodeTag(tag, buffer);
+    writeBuf.pos = 0;
+    error = TLVNode::encodeTag(tag, writeBuf);
     assert(!error);
-    assert(buffer.pos == 1);
+    assert(writeBuf.pos == 1);
     assert(Tag::numTagBytes(tag) == 1);
-    buffer.pos = 0;
-    assert(TLVNode::parseTag(buffer, &error) == tag);
+    readBuf.pos = 0;
+    assert(TLVNode::parseTag(readBuf, &error) == tag);
     assert(error == 0);
 
     uint16_t val_len = 1;
     assert(Tag::numLengthBytes(val_len) == 1);
-    buffer.pos = 0;
-    error = TLVNode::encodeLength(val_len, buffer);
+    writeBuf.pos = 0;
+    error = TLVNode::encodeLength(val_len, writeBuf);
     assert(!error);
-    assert(buffer.pos == 1);
-    buffer.pos = 0;
-    assert(TLVNode::parseLength(buffer, &error) == val_len);
+    assert(writeBuf.pos == 1);
+    readBuf.pos = 0;
+    assert(TLVNode::parseLength(readBuf, &error) == val_len);
     assert(error == 0);
 
 
     val_len = 1000;
     assert(Tag::numLengthBytes(val_len) == 3);
-    buffer.pos = 0;
-    error = TLVNode::encodeLength(val_len, buffer);
+    writeBuf.pos = 0;
+    error = TLVNode::encodeLength(val_len, writeBuf);
     assert(!error);
-    assert(buffer.pos == 3);
-    buffer.pos = 0;
-    assert(TLVNode::parseLength(buffer, &error) == val_len);
+    assert(writeBuf.pos == 3);
+    readBuf.pos = 0;
+    assert(TLVNode::parseLength(readBuf, &error) == val_len);
     assert(error == 0);
 }
 

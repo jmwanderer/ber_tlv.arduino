@@ -31,7 +31,8 @@
 
 
 class TLVS;
-class DataBuffer;
+class ReadBuffer;
+class WriteBuffer;
 
 
 //
@@ -53,10 +54,10 @@ public:
     
     // Utility functions to encode decode tags and length
     // Public to enable testing.
-    static uint16_t parseTag(DataBuffer &buffer, int *error);
-    static int encodeTag(uint16_t tag, DataBuffer & buffer);
-    static uint16_t parseLength(DataBuffer &buffer, int *error);
-    static int encodeLength(uint32_t length, DataBuffer &buffer);
+    static uint16_t parseTag(ReadBuffer &buffer, int *error);
+    static int encodeTag(uint16_t tag, WriteBuffer & buffer);
+    static uint16_t parseLength(ReadBuffer &buffer, int *error);
+    static int encodeLength(uint32_t length, WriteBuffer &buffer);
 
 private:
     TLVNode(uint16_t tag = 0, uint16_t length = 0);
@@ -64,8 +65,8 @@ private:
 
     void freeContents();
     uint32_t getTotalBytes();
-    void encodeTLVNode(TLVS *tlvs, DataBuffer &buffer);
-    void decodeTLVNode(TLVS *tlvs, DataBuffer &buffer);
+    void encodeTLVNode(TLVS *tlvs, WriteBuffer &buffer);
+    void decodeTLVNode(TLVS *tlvs, ReadBuffer &buffer);
     void clearCachedSize();
     void addChild(TLVNode* node);
 
@@ -180,59 +181,61 @@ public:
     static uint16_t numLengthBytes(uint16_t length);
 };
 
-// Interface to buffers to avoid over-runs, etc.
-// Potential for performance optimization here.
-class DataBuffer {
-public:
-    DataBuffer(uint8_t *buffer, uint16_t size);
-    DataBuffer(DataBuffer dataBuffer, uint16_t size);
-    DataBuffer();
 
-    bool atEnd();
-    void seek(size_t count);
-    bool getByte(uint8_t &value);
-    bool putByte(uint8_t value);
-    bool putBytes(const uint8_t *values, uint8_t len);
-    uint8_t *position();
-
-    uint8_t *buffer;
-    size_t buffer_size;
-    size_t pos;
-};
-
-// Interface to buffers to avoid over-runs, etc.
+// Interface to read buffers to avoid over-runs, etc.
 // Potential for performance optimization here.
 class ReadBuffer {
 public:
     ReadBuffer();
     ReadBuffer(const uint8_t *buffer, uint16_t size);
+
+    // Point to a sub-portion of an existing buffer.
     ReadBuffer(ReadBuffer buffer, uint16_t size);
 
+    // True if end of data reached
     bool atEnd();
+
+    // Change read position by count
     void seek(size_t count);
+
+    // Read a byte into value. Return false if out of data
     bool getByte(uint8_t &value);
+
+    // Return a pointer to the current read postion
     const uint8_t *position();
 
+    // Pointer to the buffer, may be NULL
     const uint8_t *buffer;
+
+    // Size of the total dat in the buffer
     size_t buffer_size;
+
+    // Current read position in buffer
     size_t pos;
 };
 
-// Interface to buffers to avoid over-runs, etc.
+// Interface to write buffers to avoid over-runs, etc.
 // Potential for performance optimization here.
 class WriteBuffer {
 public:
     WriteBuffer();
     WriteBuffer(uint8_t *buffer, uint16_t size);
 
+    // Write a byte into the buffer. Return false if out of space
     bool putByte(uint8_t value);
+    
+    // Return a pointer to the current write position
     uint8_t *position();
 
+    // Pointer to the buffer, may be NULL
     uint8_t *buffer;
+
+    // Size of the buffer
     size_t buffer_size;
+
+    // Position for the next write operation
     size_t pos;
 };
-
 
    
 #endif
