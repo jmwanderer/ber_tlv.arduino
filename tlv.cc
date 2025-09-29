@@ -738,3 +738,107 @@ bool DataBuffer::atEnd()
     return (pos >= buffer_size);
 }
 
+//
+// ReadBuffer: utility for safely reading data from a buffer
+//
+
+ReadBuffer::ReadBuffer()
+{
+    this->buffer = NULL;
+    this->buffer_size = 0;
+    this->pos = 0;
+}
+
+
+ReadBuffer::ReadBuffer(const uint8_t *buffer, uint16_t size)
+{
+    this->buffer = buffer;
+    this->buffer_size = size;
+    this->pos = 0;
+}
+
+// Point to a portion of an existing buffer.
+// Used to decode nexted TLVs.
+ReadBuffer::ReadBuffer(ReadBuffer buffer, uint16_t size)
+{
+    this->buffer = buffer.buffer;
+    this->pos = buffer.pos;
+    this->buffer_size = buffer.pos + size;
+    if (this->buffer_size > buffer.buffer_size)
+        this->buffer_size = buffer.buffer_size;
+}
+
+
+// Return current read or write position.
+const uint8_t * ReadBuffer::position()
+{
+    return buffer + pos;
+}
+
+// Change read position in buffer.
+void ReadBuffer::seek(size_t count)
+{
+    pos += count;
+    if (pos < 0) {
+        pos = 0;
+    } else if (pos > buffer_size) {
+        pos = buffer_size;
+    }
+}
+
+// Fetch a byte from the buffer.
+// Return false if no more bytes to read
+bool ReadBuffer::getByte(uint8_t &value)
+{
+    if (pos < buffer_size) {
+        value = buffer[pos++];
+        return true;
+    }
+    return false;
+}
+
+// Return true if no more space to write or data to read.
+bool ReadBuffer::atEnd()
+{
+    return (pos >= buffer_size);
+}
+
+
+//
+// WriteBuffer: utility for writing data to a buffer
+//
+
+WriteBuffer::WriteBuffer()
+{
+    this->buffer = NULL;
+    this->buffer_size = 0;
+    this->pos = 0;
+}
+
+
+WriteBuffer::WriteBuffer(uint8_t *buffer, uint16_t size)
+{
+    this->buffer = buffer;
+    this->buffer_size = size;
+    this->pos = 0;
+}
+
+
+// Return current read or write position.
+uint8_t * WriteBuffer::position()
+{
+    return buffer + pos;
+}
+
+// Write a byte to the buffer
+// Return false if out of space.
+bool WriteBuffer::putByte(uint8_t value)
+{
+    if (pos < buffer_size) {
+        buffer[pos++] = value;
+        return true;
+    }
+    return false;
+}
+
+

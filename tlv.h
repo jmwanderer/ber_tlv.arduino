@@ -200,5 +200,39 @@ public:
     size_t pos;
 };
 
+// Interface to buffers to avoid over-runs, etc.
+// Potential for performance optimization here.
+class ReadBuffer {
+public:
+    ReadBuffer();
+    ReadBuffer(const uint8_t *buffer, uint16_t size);
+    ReadBuffer(ReadBuffer buffer, uint16_t size);
+
+    bool atEnd();
+    void seek(size_t count);
+    bool getByte(uint8_t &value);
+    const uint8_t *position();
+
+    const uint8_t *buffer;
+    size_t buffer_size;
+    size_t pos;
+};
+
+// Interface to buffers to avoid over-runs, etc.
+// Potential for performance optimization here.
+class WriteBuffer {
+public:
+    WriteBuffer();
+    WriteBuffer(uint8_t *buffer, uint16_t size);
+
+    bool putByte(uint8_t value);
+    uint8_t *position();
+
+    uint8_t *buffer;
+    size_t buffer_size;
+    size_t pos;
+};
+
+
    
 #endif
