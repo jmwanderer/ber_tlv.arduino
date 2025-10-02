@@ -1,7 +1,7 @@
 //
-// Copyright (c) 2025 James Wanderer
+// tlv.h - Simple BER TLV encoder / decoder
 //
-// Simple BER TLV encoder / decoder
+// Copyright (c) 2025 James Wanderer
 //
 // Encode and decode BER TLV values to / from pre-allocated buffers.
 // 1 or 2 byte tags
@@ -22,12 +22,6 @@
 
 #include <stdint.h>
 #include <stddef.h>
-
-
-#define TLV_TYPE_MASK 0x20      // bit 6 P/C - first byte
-#define TLV_TAG_MASK 0x1F       // bit 1-5  -first byte
-#define TLV_CLASS_MASK 0xC0     // bit 7 - 8 - first byte
-#define TLV_LEN_MASK 0x7F       // bit 1 - 7 - len byte - 
 
 
 class TLVS;
@@ -239,6 +233,11 @@ public:
     // Position for the next write operation
     size_t pos;
 };
+
+#define TLV_TYPE_MASK 0x20      // bit 6 P/C - first byte
+#define TLV_TAG_MASK 0x1F       // bit 1-5  -first byte
+#define TLV_CLASS_MASK 0xC0     // bit 7 - 8 - first byte
+#define TLV_LEN_MASK 0x7F       // bit 1 - 7 - len byte - 
 
    
 #endif

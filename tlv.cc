@@ -1,7 +1,7 @@
 //
-// Copyright (c) 2025 James Wanderer
+// tlv.cc - Simple BER TLV encoder / decoder
 //
-// Simple BER TLV encoder / decoder
+// Copyright (c) 2025 James Wanderer
 // 
 // See tlv.h for basic information.
 //
