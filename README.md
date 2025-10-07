@@ -55,7 +55,7 @@ Select install in the library manager
 Set lib_deps in platformio.ini
 ```
 lib_deps =
-    https://github.com/jmwanderer/ber-tlv.arduino
+    https://github.com/jmwanderer/ber_tlv.arduino
 ```
 
 ## BER TLV Spec
@@ -67,7 +67,9 @@ BER TLV on Wikipedia
 
 ## Note
 
-This library is a port of https://github.com/jmwanderer/ber-tlv
+This library is a port of https://github.com/jmwanderer/ber_tlv
+The contents of the arduino branch are copied to an arduino specific
+library repository
 
 Original development and testing is done on Linux and ported to the
 Arduino framework.
