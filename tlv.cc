@@ -116,7 +116,7 @@ TLVNode* TLVS::addTLVCopy(TLVNode *parent, uint16_t tag, const uint8_t *value, u
 
 //
 // Decode TLVs from the buffer
-void TLVS::decodeTLVs(uint8_t *buffer, size_t buffer_size)
+void TLVS::decodeTLVs(const uint8_t *buffer, size_t buffer_size)
 {
     ReadBuffer dataBuffer(buffer, buffer_size);
     reset();

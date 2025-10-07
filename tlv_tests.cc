@@ -157,20 +157,20 @@ uint8_t decode_buffer[255];
 uint8_t long_buffer[1024];
 
 // Indefinite length form
-uint8_t tlvIndefLen[] = 
+const uint8_t tlvIndefLen[] = 
 {
     0x6F,0x80,0x84,0x07,0x00,0x00
 };
 
 // Too long
-uint8_t tlvLongLen[] = 
+const uint8_t tlvLongLen[] = 
 {
     0x6F,0x83,0x84,0x07,0x05,0x55
 };
 
 
 // 3 Tag bytes
-uint8_t tlvLongTag[] = 
+const uint8_t tlvLongTag[] = 
 {
     0x7F,0x83,0x84,0x07,0x05,0x55
 };

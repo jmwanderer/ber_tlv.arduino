@@ -100,7 +100,7 @@ public:
     size_t encodeTLVs(uint8_t *buffer, size_t buffer_size);
 
     // Decode buffer contents and create TLV nodes
-    void decodeTLVs(uint8_t *buffer, size_t buffer_size);
+    void decodeTLVs(const uint8_t *buffer, size_t buffer_size);
     
     // Report first error, if any, from an encode or decode.
     // 0 == no error.
