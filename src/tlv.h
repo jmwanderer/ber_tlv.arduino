@@ -146,7 +146,7 @@ public:
     static size_t hexToBin(const char* str, uint8_t* buffer, size_t buffer_size);
 
     // Maximum size of a TLV
-    static const int MAX_DATA_LENGTH = (1<<16) - 1;
+    static const int MAX_DATA_LENGTH = 0xffff;
 
     // Errors
     static const int ERROR_NONE = 0;
