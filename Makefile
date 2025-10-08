@@ -4,11 +4,11 @@ all: test example
 test: tlv_tests
 	./tlv_tests
 
-tlv_tests: tlv.cc tlv_tests.cc
-	g++ -fsanitize=address -o tlv_tests tlv.cc tlv_tests.cc
+tlv_tests: tlv.cpp tlv_tests.cpp
+	g++ -fsanitize=address -o tlv_tests tlv.cpp tlv_tests.cpp
 
-example: tlv.cc example.cc
-	g++ -o example tlv.cc example.cc
+example: tlv.cpp example.cpp
+	g++ -o example tlv.cpp example.cpp
 
 .PHONY: clean
 clean:
