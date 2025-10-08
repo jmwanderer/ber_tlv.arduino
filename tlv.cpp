@@ -5,9 +5,7 @@
 // 
 // See tlv.h for basic information.
 //
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <Arduino.h>
 
 #include "tlv.h"
 
@@ -195,11 +193,11 @@ void TLVS::printHex(const uint8_t* data, size_t length)
 
     for (int i = 0; i < length; i++) {
         if (i != 0) {
-            printf(" ");
+            Serial.print(" ");
         }
-        printf("%02x", data[i]);
+        Serial.print(data[i] >> 4, HEX);
+        Serial.print(data[i] & 0xf, HEX);
     }
-        
 }
 
 void TLVS::printValue(const uint8_t* data, size_t length)
@@ -216,7 +214,11 @@ void TLVS::printValue(const uint8_t* data, size_t length)
 
     if (ascii) {
         for (int i = 0; i < length; i++) {
-            printf("%c ", data[i]);
+            char buffer[3];
+            buffer[0] = (char) data[i];
+            buffer[1] = ' ';
+            buffer[2] = '\0';
+            Serial.print(buffer);
         }
     } else {
         printHex(data, length);
@@ -227,21 +229,23 @@ void TLVS::printValue(const uint8_t* data, size_t length)
 void TLVS::printTLV(TLVNode* node, int indent)
 {
     for (int i = 0; i < indent; i++)
-        printf("    ");
+        Serial.print("    ");
 
     if (node == NULL) {
-        printf("NULL pointer for TLVNode....");
+        Serial.println("NULL pointer for TLVNode....");
         return;
     }
 
-    printf("Tag: %x, Length: %x\n", node->getTag(), node->getValueLength());
+    Serial.print("Tag: ");
+    Serial.print(node->getTag(), HEX);
+    Serial.print(" Length: ");
+    Serial.println(node->getValueLength(), HEX);
     TLVNode *child = node->firstChild();
     if (child == NULL) {
         for (int i = 0; i <= indent; i++)
-            printf("    ");
- 
+            Serial.print("    ");
         printValue(node->getValue(), node->getValueLength());
-        printf("\n");
+        Serial.println("");
     }
 
     while (child != NULL) {
